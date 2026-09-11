@@ -38,7 +38,8 @@ const EQUIPAMENTOS_GATEWAY = [
 ];
 
 http.createServer((req, res) => {
-  const parsedUrl = url.parse(req.url, true);
+  const reqHost   = req.headers.host || `localhost:${PORT}`;
+  const parsedUrl = new URL(req.url, `http://${reqHost}`);
   const pathname  = parsedUrl.pathname;
 
   // -------------------------------------------------------------------------
@@ -54,8 +55,8 @@ http.createServer((req, res) => {
   }
 
   if (pathname === '/api/gateway/equipamentos') {
-    const fazendaCod = parsedUrl.query.fazenda || parsedUrl.query.codIntegracao || '';
-    const searchTerm = (parsedUrl.query.search || parsedUrl.query.searchTerm || '').trim().toUpperCase();
+    const fazendaCod = parsedUrl.searchParams.get('fazenda') || parsedUrl.searchParams.get('codIntegracao') || '';
+    const searchTerm = (parsedUrl.searchParams.get('search') || parsedUrl.searchParams.get('searchTerm') || '').trim().toUpperCase();
 
     let list = EQUIPAMENTOS_GATEWAY;
     if (fazendaCod) {
