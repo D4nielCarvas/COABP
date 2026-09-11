@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Sistema de Registro de Manutenções COA — gerencie solicitações de manutenção com controle de status, categorias e histórico." />
+  <title>COA — Sistema de Manutenções</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       TELA DE LOGIN
+  ═══════════════════════════════════════════════════════════════ -->
+  <div id="screen-login" class="screen active">
+    <div class="login-bg">
+      <div class="login-orb orb-1"></div>
+      <div class="login-orb orb-2"></div>
+      <div class="login-orb orb-3"></div>
+    </div>
+    <div class="login-card">
+      <div class="login-logo">
+        <div class="logo-icon">⚙️</div>
+        <h1 class="logo-title">COA</h1>
+        <p class="logo-sub">Sistema de Manutenções</p>
+      </div>
+      <form id="login-form" class="login-form" novalidate>
+        <div class="field-group">
+          <label for="login-email" class="field-label">E-mail</label>
+          <input id="login-email" type="email" class="field-input" placeholder="seu@email.com" autocomplete="email" required />
+        </div>
+        <div class="field-group">
+          <label for="login-password" class="field-label">Senha</label>
+          <div class="input-wrapper">
+            <input id="login-password" type="password" class="field-input" placeholder="••••••••" autocomplete="current-password" required />
+            <button type="button" id="btn-toggle-pass" class="input-action" title="Mostrar/ocultar senha">👁</button>
+          </div>
+        </div>
+        <p id="login-error" class="error-msg" aria-live="polite"></p>
+        <button id="btn-login" type="submit" class="btn btn-primary btn-full">
+          <span id="btn-login-text">Entrar</span>
+          <span id="btn-login-loader" class="btn-loader hidden"></span>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       TELA DO DASHBOARD
+  ═══════════════════════════════════════════════════════════════ -->
+  <div id="screen-dashboard" class="screen">
+
+    <!-- Topbar -->
+    <header class="topbar">
+      <div class="topbar-left">
+        <span class="topbar-logo">⚙️ COA</span>
+        <span class="topbar-title">Sistema de Manutenções</span>
+      </div>
+      <div class="topbar-right">
+        <span id="user-display" class="user-chip"></span>
+        <button id="btn-logout" class="btn btn-ghost btn-sm" title="Sair">Sair</button>
+      </div>
+    </header>
+
+    <!-- Conteúdo principal -->
+    <main class="main-content">
+
+      <!-- Stats cards -->
+      <section class="stats-row" aria-label="Resumo por status">
+        <div class="stat-card" data-filter-status="Na Fila">
+          <span class="stat-label">Na Fila</span>
+          <span class="stat-num" id="stat-fila">0</span>
+        </div>
+        <div class="stat-card" data-filter-status="Em Andamento">
+          <span class="stat-label">Em Andamento</span>
+          <span class="stat-num" id="stat-andamento">0</span>
+        </div>
+        <div class="stat-card" data-filter-status="Aguardando Terceiro">
+          <span class="stat-label">Aguard. Terceiro</span>
+          <span class="stat-num" id="stat-terceiro">0</span>
+        </div>
+        <div class="stat-card" data-filter-status="Realizada">
+          <span class="stat-label">Realizadas</span>
+          <span class="stat-num" id="stat-realizada">0</span>
+        </div>
+      </section>
+
+      <!-- Toolbar de filtros + ação -->
+      <div class="toolbar">
+        <div class="filters">
+          <select id="filter-status" class="filter-select" aria-label="Filtrar por status">
+            <option value="">Todos os Status</option>
+            <option value="Na Fila">Na Fila</option>
+            <option value="Em Andamento">Em Andamento</option>
+            <option value="Aguardando Terceiro">Aguardando Terceiro</option>
+            <option value="Realizada">Realizada</option>
+          </select>
+          <select id="filter-categoria" class="filter-select" aria-label="Filtrar por categoria">
+            <option value="">Todas as Categorias</option>
+            <option value="Software">Software</option>
+            <option value="Hardware">Hardware</option>
+            <option value="Mecânica">Mecânica</option>
+            <option value="Elétrica">Elétrica</option>
+            <option value="Apoio">Apoio</option>
+            <option value="Solinftec">Solinftec</option>
+            <option value="Administrativo">Administrativo</option>
+          </select>
+          <input id="filter-search" class="filter-input" type="search" placeholder="🔍  Buscar manutenção..." aria-label="Buscar manutenção" />
+        </div>
+        <button id="btn-nova" class="btn btn-primary" aria-label="Criar nova manutenção">
+          + Nova Manutenção
+        </button>
+      </div>
+
+      <!-- Tabela / Lista -->
+      <div class="table-wrapper" role="region" aria-label="Lista de manutenções">
+        <table class="maint-table" id="maint-table">
+          <thead>
+            <tr>
+              <th>Título</th>
+              <th>Categoria</th>
+              <th>Status</th>
+              <th>Solicitante</th>
+              <th>Data Solicitação</th>
+              <th>Data Conclusão</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody id="maint-tbody">
+            <!-- preenchido dinamicamente -->
+          </tbody>
+        </table>
+        <div id="empty-state" class="empty-state hidden">
+          <div class="empty-icon">🔧</div>
+          <p>Nenhuma manutenção encontrada.</p>
+          <button class="btn btn-ghost btn-sm" id="btn-empty-nova">Criar a primeira</button>
+        </div>
+        <div id="table-loader" class="table-loader hidden">
+          <div class="spinner"></div>
+          <p>Carregando...</p>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       MODAL — CRIAR / EDITAR MANUTENÇÃO
+  ═══════════════════════════════════════════════════════════════ -->
+  <div id="modal-overlay" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h2 id="modal-title" class="modal-title">Nova Manutenção</h2>
+        <button id="btn-modal-close" class="btn-icon" aria-label="Fechar modal">✕</button>
+      </div>
+      <div class="modal-body">
+        <form id="modal-form" novalidate>
+          <input type="hidden" id="modal-id" />
+
+          <!-- Título -->
+          <div class="field-group">
+            <label for="m-titulo" class="field-label">Título <span class="required">*</span></label>
+            <input id="m-titulo" type="text" class="field-input" placeholder="Descreva resumidamente o problema" required />
+          </div>
+
+          <!-- Linha: Categoria + Status -->
+          <div class="field-row">
+            <div class="field-group">
+              <label for="m-categoria" class="field-label">Categoria <span class="required">*</span></label>
+              <select id="m-categoria" class="field-input" required>
+                <option value="" disabled selected>Selecione</option>
+                <option value="Software">Software</option>
+                <option value="Hardware">Hardware</option>
+                <option value="Mecânica">Mecânica</option>
+                <option value="Elétrica">Elétrica</option>
+                <option value="Apoio">Apoio</option>
+                <option value="Solinftec">Solinftec</option>
+                <option value="Administrativo">Administrativo</option>
+              </select>
+            </div>
+            <div class="field-group">
+              <label for="m-status" class="field-label">Status <span class="required">*</span></label>
+              <select id="m-status" class="field-input" required>
+                <option value="Na Fila">Na Fila</option>
+                <option value="Em Andamento">Em Andamento</option>
+                <option value="Aguardando Terceiro">Aguardando Terceiro</option>
+                <option value="Realizada">Realizada</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Descrição -->
+          <div class="field-group">
+            <label for="m-descricao" class="field-label">Descrição</label>
+            <textarea id="m-descricao" class="field-input field-textarea" placeholder="Detalhe o problema, equipamento, localização, etc." rows="3"></textarea>
+          </div>
+
+          <!-- Solução -->
+          <div class="field-group">
+            <label for="m-solucao" class="field-label">Solução</label>
+            <textarea id="m-solucao" class="field-input field-textarea" placeholder="Descreva como foi resolvido (preencher ao concluir)" rows="3"></textarea>
+          </div>
+
+          <!-- Datas (somente leitura) -->
+          <div class="field-row">
+            <div class="field-group">
+              <label class="field-label">Data da Solicitação</label>
+              <input id="m-data-sol" type="text" class="field-input readonly" readonly />
+            </div>
+            <div class="field-group">
+              <label class="field-label">Data da Conclusão</label>
+              <input id="m-data-conc" type="text" class="field-input readonly" readonly placeholder="Preench. ao concluir" />
+            </div>
+          </div>
+
+          <!-- Solicitante (somente leitura) -->
+          <div class="field-group">
+            <label class="field-label">Solicitante</label>
+            <input id="m-solicitante" type="text" class="field-input readonly" readonly />
+          </div>
+
+          <p id="modal-error" class="error-msg" aria-live="polite"></p>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button id="btn-modal-cancel" class="btn btn-ghost">Cancelar</button>
+        <button id="btn-modal-save" class="btn btn-primary">
+          <span id="btn-save-text">Salvar</span>
+          <span id="btn-save-loader" class="btn-loader hidden"></span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast de notificação -->
+  <div id="toast" class="toast hidden" role="status" aria-live="polite"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
