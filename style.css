@@ -528,7 +528,9 @@ select.field-input option { background: var(--bg-elevated); color: var(--text-pr
   .maint-table thead th:nth-child(5),
   .maint-table td:nth-child(5),
   .maint-table thead th:nth-child(6),
-  .maint-table td:nth-child(6) { display: none; }
+  .maint-table td:nth-child(6),
+  .maint-table thead th:nth-child(7),
+  .maint-table td:nth-child(7) { display: none; }
   .login-card { padding: 32px 24px; }
   .stats-row { grid-template-columns: 1fr 1fr; }
 }

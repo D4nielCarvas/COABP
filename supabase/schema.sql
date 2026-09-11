@@ -15,6 +15,8 @@ create table if not exists public.manutencoes (
                                check (categoria in ('Software', 'Hardware', 'Mecânica', 'Elétrica', 'Apoio', 'Solinftec', 'Administrativo')),
   solicitante_id   uuid        references auth.users(id) on delete set null,
   solicitante_nome text,
+  responsavel_id   uuid        references auth.users(id) on delete set null,
+  responsavel_nome text,
   data_solicitacao timestamptz not null default now(),
   data_conclusao   timestamptz,
   created_at       timestamptz not null default now(),
@@ -54,3 +56,11 @@ create trigger trg_manutencoes_updated_at
 create index if not exists idx_manutencoes_status    on public.manutencoes (status);
 create index if not exists idx_manutencoes_categoria on public.manutencoes (categoria);
 create index if not exists idx_manutencoes_created   on public.manutencoes (created_at desc);
+
+-- 6. Migração (caso a tabela já tenha sido criada anteriormente):
+-- Execute caso as colunas de responsável ainda não existam:
+alter table public.manutencoes
+  add column if not exists responsavel_id   uuid references auth.users(id) on delete set null,
+  add column if not exists responsavel_nome text;
+
+create index if not exists idx_manutencoes_responsavel on public.manutencoes (responsavel_id);

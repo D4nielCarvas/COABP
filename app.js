@@ -169,7 +169,9 @@ const State = (() => {
       const matchCategoria = !_filters.categoria || m.categoria === _filters.categoria;
       const matchSearch    = !_filters.search
         || m.titulo.toLowerCase().includes(_filters.search.toLowerCase())
-        || (m.descricao || '').toLowerCase().includes(_filters.search.toLowerCase());
+        || (m.descricao || '').toLowerCase().includes(_filters.search.toLowerCase())
+        || (m.solicitante_nome || '').toLowerCase().includes(_filters.search.toLowerCase())
+        || (m.responsavel_nome || '').toLowerCase().includes(_filters.search.toLowerCase());
       return matchStatus && matchCategoria && matchSearch;
     });
   }
@@ -319,6 +321,7 @@ const Dashboard = (() => {
         <td><span class="badge-cat ${catClass(m.categoria)}">${escapeHtml(m.categoria)}</span></td>
         <td><span class="badge-status ${statusClass(m.status)}">${escapeHtml(m.status)}</span></td>
         <td>${escapeHtml(m.solicitante_nome || '—')}</td>
+        <td>${escapeHtml(m.responsavel_nome || '—')}</td>
         <td>${formatDate(m.data_solicitacao)}</td>
         <td>${formatDate(m.data_conclusao)}</td>
         <td>
@@ -390,11 +393,13 @@ const Modal = (() => {
       ? formatDate(maintenance.data_conclusao)
       : '';
 
-    // Solicitante: quem está logado
+    // Solicitante: campo preenchível pelo usuário
+    document.getElementById('m-solicitante').value = maintenance?.solicitante_nome || '';
+
+    // Responsável: registrado automaticamente com o usuário logado
     const session = Supabase.getSession();
-    document.getElementById('m-solicitante').value = maintenance?.solicitante_nome
-      || getUserDisplayName(session?.user)
-      || '';
+    const currentUser = getUserDisplayName(session?.user);
+    document.getElementById('m-responsavel').value = maintenance?.responsavel_nome || currentUser;
 
     document.getElementById('modal-error').textContent = '';
     document.getElementById('modal-overlay').classList.remove('hidden');
@@ -409,12 +414,13 @@ const Modal = (() => {
   }
 
   async function save() {
-    const titulo     = document.getElementById('m-titulo').value.trim();
-    const categoria  = document.getElementById('m-categoria').value;
-    const status     = document.getElementById('m-status').value;
-    const descricao  = document.getElementById('m-descricao').value.trim();
-    const solucao    = document.getElementById('m-solucao').value.trim();
-    const errorEl    = document.getElementById('modal-error');
+    const titulo      = document.getElementById('m-titulo').value.trim();
+    const categoria   = document.getElementById('m-categoria').value;
+    const status      = document.getElementById('m-status').value;
+    const solicitante = document.getElementById('m-solicitante').value.trim();
+    const descricao   = document.getElementById('m-descricao').value.trim();
+    const solucao     = document.getElementById('m-solucao').value.trim();
+    const errorEl     = document.getElementById('modal-error');
 
     errorEl.textContent = '';
 
@@ -427,6 +433,11 @@ const Modal = (() => {
       errorEl.textContent = 'Selecione uma categoria.';
       return;
     }
+    if (!solicitante) {
+      errorEl.textContent = 'O campo Solicitante é obrigatório.';
+      document.getElementById('m-solicitante').focus();
+      return;
+    }
 
     // Mostrar loader
     const btnText   = document.getElementById('btn-save-text');
@@ -437,11 +448,13 @@ const Modal = (() => {
 
     try {
       const session = Supabase.getSession();
+      const responsavelNome = getUserDisplayName(session?.user);
 
       if (_editingId) {
         // EDIÇÃO
         const payload = {
           titulo, categoria, status, descricao, solucao,
+          solicitante_nome: solicitante,
           updated_at: new Date().toISOString(),
         };
         // Se mudou para "Realizada", registrar data de conclusão
@@ -460,12 +473,27 @@ const Modal = (() => {
         // CRIAÇÃO
         const payload = {
           titulo, categoria, status, descricao, solucao,
+          solicitante_nome: solicitante,
+          responsavel_id:   session?.user?.id   || null,
+          responsavel_nome: responsavelNome,
           data_solicitacao: new Date().toISOString(),
-          solicitante_id:   session?.user?.id   || null,
-          solicitante_nome: getUserDisplayName(session?.user),
           data_conclusao:   status === 'Realizada' ? new Date().toISOString() : null,
         };
-        await Supabase.insert(TABLE, payload);
+
+        try {
+          await Supabase.insert(TABLE, payload);
+        } catch (insertErr) {
+          const msg = insertErr.message || '';
+          // Fallback resiliente caso a coluna responsavel_nome ainda não tenha sido criada no Supabase
+          if (msg.includes('responsavel_nome') || msg.includes('responsavel_id')) {
+            delete payload.responsavel_id;
+            delete payload.responsavel_nome;
+            await Supabase.insert(TABLE, payload);
+            showToast('Manutenção criada! (Aviso: execute o SQL para persistir a coluna responsável)', 'info');
+          } else {
+            throw insertErr;
+          }
+        }
         showToast('Manutenção criada com sucesso!', 'success');
       }
 
