@@ -183,7 +183,8 @@ select.field-input option { background: var(--bg-elevated); color: var(--text-pr
 }
 .input-action:hover { color: var(--text-primary); }
 
-.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.field-row   { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.field-row-3 { display: grid; grid-template-columns: 1fr 1fr 1.3fr; gap: 16px; }
 
 /* ── 4. BOTÕES ───────────────────────────────────────────────────── */
 .btn {
@@ -395,6 +396,34 @@ select.field-input option { background: var(--bg-elevated); color: var(--text-pr
   50%      { opacity: 0.5; transform: scale(1.4); }
 }
 
+.table-subtext {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+.badge-farm {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 600;
+  color: #34d399;
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  border-radius: var(--radius-sm);
+  padding: 2px 8px;
+  white-space: nowrap;
+}
+.badge-frota {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 700;
+  color: #fb923c;
+  background: rgba(249, 115, 22, 0.1);
+  border: 1px solid rgba(249, 115, 22, 0.25);
+  border-radius: var(--radius-sm);
+  padding: 2px 8px;
+  white-space: nowrap;
+}
+
 /* Badges de categoria */
 .badge-cat {
   display: inline-block; border-radius: var(--radius-sm);
@@ -516,21 +545,31 @@ select.field-input option { background: var(--bg-elevated); color: var(--text-pr
 /* ── 13. RESPONSIVIDADE ─────────────────────────────────────────── */
 @media (max-width: 900px) {
   .stats-row { grid-template-columns: repeat(2, 1fr); }
+  .maint-table thead th:nth-child(2),
+  .maint-table td:nth-child(2),
+  .maint-table thead th:nth-child(7),
+  .maint-table td:nth-child(7),
+  .maint-table thead th:nth-child(9),
+  .maint-table td:nth-child(9) { display: none; }
 }
 @media (max-width: 700px) {
   .main-content { padding: 16px; }
   .toolbar { flex-direction: column; align-items: stretch; }
   .filters { flex-direction: column; }
   .filter-input { min-width: unset; width: 100%; }
-  .field-row { grid-template-columns: 1fr; }
-  .maint-table thead th:nth-child(4),
-  .maint-table td:nth-child(4),
-  .maint-table thead th:nth-child(5),
-  .maint-table td:nth-child(5),
+  .field-row, .field-row-3 { grid-template-columns: 1fr; }
+  .maint-table thead th:nth-child(2),
+  .maint-table td:nth-child(2),
+  .maint-table thead th:nth-child(3),
+  .maint-table td:nth-child(3),
   .maint-table thead th:nth-child(6),
   .maint-table td:nth-child(6),
   .maint-table thead th:nth-child(7),
-  .maint-table td:nth-child(7) { display: none; }
+  .maint-table td:nth-child(7),
+  .maint-table thead th:nth-child(8),
+  .maint-table td:nth-child(8),
+  .maint-table thead th:nth-child(9),
+  .maint-table td:nth-child(9) { display: none; }
   .login-card { padding: 32px 24px; }
   .stats-row { grid-template-columns: 1fr 1fr; }
 }

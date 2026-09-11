@@ -17,6 +17,9 @@ create table if not exists public.manutencoes (
   solicitante_nome text,
   responsavel_id   uuid        references auth.users(id) on delete set null,
   responsavel_nome text,
+  fazenda          text,
+  frota            text,
+  equipamento      text,
   data_solicitacao timestamptz not null default now(),
   data_conclusao   timestamptz,
   created_at       timestamptz not null default now(),
@@ -58,9 +61,14 @@ create index if not exists idx_manutencoes_categoria on public.manutencoes (cate
 create index if not exists idx_manutencoes_created   on public.manutencoes (created_at desc);
 
 -- 6. Migração (caso a tabela já tenha sido criada anteriormente):
--- Execute caso as colunas de responsável ainda não existam:
+-- Execute no SQL Editor do Supabase se as novas colunas ainda não existirem:
 alter table public.manutencoes
   add column if not exists responsavel_id   uuid references auth.users(id) on delete set null,
-  add column if not exists responsavel_nome text;
+  add column if not exists responsavel_nome text,
+  add column if not exists fazenda          text,
+  add column if not exists frota            text,
+  add column if not exists equipamento      text;
 
 create index if not exists idx_manutencoes_responsavel on public.manutencoes (responsavel_id);
+create index if not exists idx_manutencoes_fazenda     on public.manutencoes (fazenda);
+create index if not exists idx_manutencoes_frota       on public.manutencoes (frota);

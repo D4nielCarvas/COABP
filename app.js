@@ -154,6 +154,55 @@ const Supabase = (() => {
 })();
 
 /* ═══════════════════════════════════════════════════════════════════
+   1.1 CLIENTE DO GATEWAY DE EQUIPAMENTOS (equipment-agent)
+═══════════════════════════════════════════════════════════════════ */
+const Gateway = (() => {
+  let _fazendasCache = null;
+  const _equipamentosCache = {};
+
+  async function getFazendas() {
+    if (_fazendasCache) return _fazendasCache;
+    try {
+      const res = await fetch('/api/gateway/fazendas');
+      if (!res.ok) throw new Error('Erro ao obter fazendas');
+      _fazendasCache = await res.json();
+      return _fazendasCache;
+    } catch (err) {
+      console.warn('Falha no gateway de fazendas, utilizando lista padrão:', err.message);
+      _fazendasCache = [
+        { codigo: '01', nome: '01 - Fazenda Matriz' },
+        { codigo: '02', nome: '02 - Fazenda Santa Maria' },
+        { codigo: '03', nome: '03 - Fazenda Boa Vista' },
+        { codigo: '04', nome: '04 - Fazenda São José' }
+      ];
+      return _fazendasCache;
+    }
+  }
+
+  async function getEquipamentos(fazendaCod, search = '') {
+    const cacheKey = `${fazendaCod}_${search}`;
+    if (_equipamentosCache[cacheKey]) return _equipamentosCache[cacheKey];
+
+    try {
+      const params = new URLSearchParams();
+      if (fazendaCod) params.set('fazenda', fazendaCod);
+      if (search) params.set('search', search);
+
+      const res = await fetch(`/api/gateway/equipamentos?${params.toString()}`);
+      if (!res.ok) throw new Error('Erro ao obter equipamentos');
+      const data = await res.json();
+      _equipamentosCache[cacheKey] = data;
+      return data;
+    } catch (err) {
+      console.warn('Falha no gateway de equipamentos:', err.message);
+      return [];
+    }
+  }
+
+  return { getFazendas, getEquipamentos };
+})();
+
+/* ═══════════════════════════════════════════════════════════════════
    2. MÓDULO DE ESTADO
 ═══════════════════════════════════════════════════════════════════ */
 const State = (() => {
@@ -171,7 +220,10 @@ const State = (() => {
         || m.titulo.toLowerCase().includes(_filters.search.toLowerCase())
         || (m.descricao || '').toLowerCase().includes(_filters.search.toLowerCase())
         || (m.solicitante_nome || '').toLowerCase().includes(_filters.search.toLowerCase())
-        || (m.responsavel_nome || '').toLowerCase().includes(_filters.search.toLowerCase());
+        || (m.responsavel_nome || '').toLowerCase().includes(_filters.search.toLowerCase())
+        || (m.fazenda || '').toLowerCase().includes(_filters.search.toLowerCase())
+        || (m.frota || '').toLowerCase().includes(_filters.search.toLowerCase())
+        || (m.equipamento || '').toLowerCase().includes(_filters.search.toLowerCase());
       return matchStatus && matchCategoria && matchSearch;
     });
   }
@@ -317,7 +369,12 @@ const Dashboard = (() => {
 
     tbody.innerHTML = list.map(m => `
       <tr data-id="${m.id}">
-        <td><strong>${escapeHtml(m.titulo)}</strong></td>
+        <td>
+          <strong>${escapeHtml(m.titulo)}</strong>
+          ${m.equipamento ? `<div class="table-subtext">🚜 ${escapeHtml(m.equipamento)}</div>` : ''}
+        </td>
+        <td><span class="badge-farm">${escapeHtml(m.fazenda || '—')}</span></td>
+        <td><span class="badge-frota">${escapeHtml(m.frota || '—')}</span></td>
         <td><span class="badge-cat ${catClass(m.categoria)}">${escapeHtml(m.categoria)}</span></td>
         <td><span class="badge-status ${statusClass(m.status)}">${escapeHtml(m.status)}</span></td>
         <td>${escapeHtml(m.solicitante_nome || '—')}</td>
@@ -375,7 +432,36 @@ const Dashboard = (() => {
 const Modal = (() => {
   let _editingId = null;
 
-  function open(maintenance = null) {
+  async function onFazendaChange(fazendaCod, selectedFrota = null) {
+    const frotaSelect = document.getElementById('m-frota');
+    frotaSelect.innerHTML = '<option value="" disabled selected>Carregando frotas...</option>';
+    frotaSelect.disabled = true;
+
+    if (!fazendaCod) {
+      frotaSelect.innerHTML = '<option value="" disabled selected>Selecione a fazenda primeiro</option>';
+      return;
+    }
+
+    const equipamentos = await Gateway.getEquipamentos(fazendaCod);
+    frotaSelect.innerHTML = '<option value="" disabled selected>Selecione a frota</option>';
+
+    equipamentos.forEach(eq => {
+      const opt = document.createElement('option');
+      const val = eq.frota || eq.codigo;
+      opt.value = val;
+      opt.dataset.desc = eq.descricao || '';
+      opt.dataset.codigo = eq.codigo || '';
+      opt.textContent = `${val} — ${eq.descricao}`;
+      if (selectedFrota && (val === selectedFrota || eq.codigo === selectedFrota)) {
+        opt.selected = true;
+      }
+      frotaSelect.appendChild(opt);
+    });
+
+    frotaSelect.disabled = false;
+  }
+
+  async function open(maintenance = null) {
     _editingId = maintenance?.id || null;
     const isEdit = !!_editingId;
 
@@ -401,6 +487,35 @@ const Modal = (() => {
     const currentUser = getUserDisplayName(session?.user);
     document.getElementById('m-responsavel').value = maintenance?.responsavel_nome || currentUser;
 
+    // Equipamento
+    document.getElementById('m-equipamento').value = maintenance?.equipamento || '';
+
+    // Carregar Fazendas via Gateway
+    const fazendaSelect = document.getElementById('m-fazenda');
+    fazendaSelect.innerHTML = '<option value="" disabled selected>Carregando fazendas...</option>';
+    const fazendas = await Gateway.getFazendas();
+
+    fazendaSelect.innerHTML = '<option value="" disabled selected>Selecione a fazenda</option>';
+    fazendas.forEach(f => {
+      const opt = document.createElement('option');
+      opt.value = f.codigo;
+      opt.textContent = f.nome;
+      if (maintenance?.fazenda && (maintenance.fazenda === f.codigo || maintenance.fazenda === f.nome)) {
+        opt.selected = true;
+      }
+      fazendaSelect.appendChild(opt);
+    });
+
+    if (maintenance?.fazenda) {
+      const match = fazendas.find(f => f.codigo === maintenance.fazenda || f.nome === maintenance.fazenda);
+      const cod = match ? match.codigo : maintenance.fazenda;
+      await onFazendaChange(cod, maintenance.frota);
+    } else {
+      const frotaSelect = document.getElementById('m-frota');
+      frotaSelect.innerHTML = '<option value="" disabled selected>Selecione a fazenda primeiro</option>';
+      frotaSelect.disabled = true;
+    }
+
     document.getElementById('modal-error').textContent = '';
     document.getElementById('modal-overlay').classList.remove('hidden');
 
@@ -415,6 +530,9 @@ const Modal = (() => {
 
   async function save() {
     const titulo      = document.getElementById('m-titulo').value.trim();
+    const fazendaCod  = document.getElementById('m-fazenda').value;
+    const frota       = document.getElementById('m-frota').value;
+    const equipamento = document.getElementById('m-equipamento').value.trim();
     const categoria   = document.getElementById('m-categoria').value;
     const status      = document.getElementById('m-status').value;
     const solicitante = document.getElementById('m-solicitante').value.trim();
@@ -429,6 +547,21 @@ const Modal = (() => {
       document.getElementById('m-titulo').focus();
       return;
     }
+    if (!fazendaCod) {
+      errorEl.textContent = 'Selecione uma fazenda.';
+      document.getElementById('m-fazenda').focus();
+      return;
+    }
+    if (!frota) {
+      errorEl.textContent = 'Selecione uma frota.';
+      document.getElementById('m-frota').focus();
+      return;
+    }
+    if (!equipamento) {
+      errorEl.textContent = 'O equipamento é obrigatório.';
+      document.getElementById('m-equipamento').focus();
+      return;
+    }
     if (!categoria) {
       errorEl.textContent = 'Selecione uma categoria.';
       return;
@@ -438,6 +571,9 @@ const Modal = (() => {
       document.getElementById('m-solicitante').focus();
       return;
     }
+
+    const fazendaOpt = document.getElementById('m-fazenda').selectedOptions[0];
+    const fazendaNome = fazendaOpt ? fazendaOpt.textContent : fazendaCod;
 
     // Mostrar loader
     const btnText   = document.getElementById('btn-save-text');
@@ -455,7 +591,10 @@ const Modal = (() => {
         const payload = {
           titulo, categoria, status, descricao, solucao,
           solicitante_nome: solicitante,
-          updated_at: new Date().toISOString(),
+          fazenda:          fazendaNome,
+          frota:            frota,
+          equipamento:      equipamento,
+          updated_at:       new Date().toISOString(),
         };
         // Se mudou para "Realizada", registrar data de conclusão
         if (status === 'Realizada') {
@@ -464,10 +603,23 @@ const Modal = (() => {
             payload.data_conclusao = new Date().toISOString();
           }
         } else {
-          // Se saiu de "Realizada", limpar data
           payload.data_conclusao = null;
         }
-        await Supabase.update(TABLE, _editingId, payload);
+
+        try {
+          await Supabase.update(TABLE, _editingId, payload);
+        } catch (updateErr) {
+          const msg = updateErr.message || '';
+          if (msg.includes('fazenda') || msg.includes('frota') || msg.includes('equipamento')) {
+            delete payload.fazenda;
+            delete payload.frota;
+            delete payload.equipamento;
+            await Supabase.update(TABLE, _editingId, payload);
+            showToast('Manutenção atualizada! (Execute o script SQL para salvar fazenda/frota)', 'info');
+          } else {
+            throw updateErr;
+          }
+        }
         showToast('Manutenção atualizada com sucesso!', 'success');
       } else {
         // CRIAÇÃO
@@ -476,6 +628,9 @@ const Modal = (() => {
           solicitante_nome: solicitante,
           responsavel_id:   session?.user?.id   || null,
           responsavel_nome: responsavelNome,
+          fazenda:          fazendaNome,
+          frota:            frota,
+          equipamento:      equipamento,
           data_solicitacao: new Date().toISOString(),
           data_conclusao:   status === 'Realizada' ? new Date().toISOString() : null,
         };
@@ -484,12 +639,21 @@ const Modal = (() => {
           await Supabase.insert(TABLE, payload);
         } catch (insertErr) {
           const msg = insertErr.message || '';
-          // Fallback resiliente caso a coluna responsavel_nome ainda não tenha sido criada no Supabase
+          let stripped = false;
           if (msg.includes('responsavel_nome') || msg.includes('responsavel_id')) {
             delete payload.responsavel_id;
             delete payload.responsavel_nome;
+            stripped = true;
+          }
+          if (msg.includes('fazenda') || msg.includes('frota') || msg.includes('equipamento')) {
+            delete payload.fazenda;
+            delete payload.frota;
+            delete payload.equipamento;
+            stripped = true;
+          }
+          if (stripped) {
             await Supabase.insert(TABLE, payload);
-            showToast('Manutenção criada! (Aviso: execute o SQL para persistir a coluna responsável)', 'info');
+            showToast('Manutenção criada! (Aviso: execute o SQL para persistir as novas colunas)', 'info');
           } else {
             throw insertErr;
           }
@@ -509,7 +673,7 @@ const Modal = (() => {
     }
   }
 
-  return { open, close, save };
+  return { open, close, save, onFazendaChange };
 })();
 
 /* ═══════════════════════════════════════════════════════════════════
@@ -677,6 +841,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // ── Modal salvar ──
   document.getElementById('btn-modal-save').addEventListener('click', Modal.save);
+
+  // ── Gateway: Eventos de seleção no Modal ──
+  document.getElementById('m-fazenda').addEventListener('change', async (e) => {
+    const fazendaCod = e.target.value;
+    document.getElementById('m-equipamento').value = '';
+    await Modal.onFazendaChange(fazendaCod);
+  });
+
+  document.getElementById('m-frota').addEventListener('change', (e) => {
+    const selectedOption = e.target.selectedOptions[0];
+    const desc = selectedOption?.dataset?.desc || '';
+    if (desc) {
+      document.getElementById('m-equipamento').value = desc;
+    }
+  });
 
   // ── Fechar modal com Escape ──
   document.addEventListener('keydown', (e) => {

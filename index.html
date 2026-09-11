@@ -162,7 +162,9 @@
         <table class="maint-table" id="maint-table">
           <thead>
             <tr>
-              <th>Título</th>
+              <th>Título / Equipamento</th>
+              <th>Fazenda</th>
+              <th>Frota</th>
               <th>Categoria</th>
               <th>Status</th>
               <th>Solicitante</th>
@@ -206,6 +208,26 @@
           <div class="field-group">
             <label for="m-titulo" class="field-label">Título <span class="required">*</span></label>
             <input id="m-titulo" type="text" class="field-input" placeholder="Descreva resumidamente o problema" required />
+          </div>
+
+          <!-- Linha: Fazenda + Frota + Equipamento (Dados via Gateway) -->
+          <div class="field-row field-row-3">
+            <div class="field-group">
+              <label for="m-fazenda" class="field-label">Fazenda <span class="required">*</span></label>
+              <select id="m-fazenda" class="field-input" required>
+                <option value="" disabled selected>Selecione a fazenda</option>
+              </select>
+            </div>
+            <div class="field-group">
+              <label for="m-frota" class="field-label">Frota <span class="required">*</span></label>
+              <select id="m-frota" class="field-input" required disabled>
+                <option value="" disabled selected>Selecione a fazenda</option>
+              </select>
+            </div>
+            <div class="field-group">
+              <label for="m-equipamento" class="field-label">Equipamento <span class="required">*</span></label>
+              <input id="m-equipamento" type="text" class="field-input" placeholder="Descrição / modelo" required />
+            </div>
           </div>
 
           <!-- Linha: Categoria + Status -->
