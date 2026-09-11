@@ -620,12 +620,14 @@ const Modal = (() => {
           await Supabase.update(TABLE, _editingId, payload);
         } catch (updateErr) {
           const msg = updateErr.message || '';
-          if (msg.includes('fazenda') || msg.includes('frota') || msg.includes('equipamento')) {
+          if (msg.includes('column') || msg.includes('schema cache')) {
+            delete payload.responsavel_id;
+            delete payload.responsavel_nome;
             delete payload.fazenda;
             delete payload.frota;
             delete payload.equipamento;
             await Supabase.update(TABLE, _editingId, payload);
-            showToast('Manutenção atualizada! (Execute o script SQL para salvar fazenda/frota)', 'info');
+            showToast('Manutenção atualizada! (Execute a migração SQL no Supabase para salvar as novas colunas)', 'warning');
           } else {
             throw updateErr;
           }
@@ -647,28 +649,21 @@ const Modal = (() => {
 
         try {
           await Supabase.insert(TABLE, payload);
+          showToast('Manutenção criada com sucesso!', 'success');
         } catch (insertErr) {
           const msg = insertErr.message || '';
-          let stripped = false;
-          if (msg.includes('responsavel_nome') || msg.includes('responsavel_id')) {
+          if (msg.includes('column') || msg.includes('schema cache')) {
             delete payload.responsavel_id;
             delete payload.responsavel_nome;
-            stripped = true;
-          }
-          if (msg.includes('fazenda') || msg.includes('frota') || msg.includes('equipamento')) {
             delete payload.fazenda;
             delete payload.frota;
             delete payload.equipamento;
-            stripped = true;
-          }
-          if (stripped) {
             await Supabase.insert(TABLE, payload);
-            showToast('Manutenção criada! (Aviso: execute o SQL para persistir as novas colunas)', 'info');
+            showToast('Manutenção criada! (Aviso: execute a migração SQL no Supabase para salvar fazenda/frota)', 'warning');
           } else {
             throw insertErr;
           }
         }
-        showToast('Manutenção criada com sucesso!', 'success');
       }
 
       close();
