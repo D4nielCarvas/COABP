@@ -170,10 +170,20 @@ const Gateway = (() => {
     } catch (err) {
       console.warn('Falha no gateway de fazendas, utilizando lista padrão:', err.message);
       _fazendasCache = [
-        { codigo: '01', nome: '01 - Fazenda Matriz' },
-        { codigo: '02', nome: '02 - Fazenda Santa Maria' },
-        { codigo: '03', nome: '03 - Fazenda Boa Vista' },
-        { codigo: '04', nome: '04 - Fazenda São José' }
+        { codigo: '5',  nome: '5 - São Manoel' },
+        { codigo: '6',  nome: '6 - Tangara' },
+        { codigo: '21', nome: '21 - São Pedro' },
+        { codigo: '25', nome: '25 - São Judas' },
+        { codigo: '26', nome: '26 - São Francisco' },
+        { codigo: '33', nome: '33 - Santana' },
+        { codigo: '34', nome: '34 - Santa Eliza' },
+        { codigo: '36', nome: '36 - Santa Francisca' },
+        { codigo: '17', nome: '17 - Santa Lucia 1' },
+        { codigo: '24', nome: '24 - Santa Lucia 2' },
+        { codigo: '18', nome: '18 - Caroline' },
+        { codigo: '27', nome: '27 - São João' },
+        { codigo: '28', nome: '28 - Santa Luzia' },
+        { codigo: '10', nome: '10 - Santa Adelina' }
       ];
       return _fazendasCache;
     }

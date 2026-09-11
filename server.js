@@ -17,24 +17,57 @@ const MIME = {
 // BASE DE DADOS DO GATEWAY DE EQUIPAMENTOS (Baseado no equipment-agent / Oracle)
 // ---------------------------------------------------------------------------
 const FAZENDAS_GATEWAY = [
-  { codigo: '01', nome: '01 - Fazenda Matriz' },
-  { codigo: '02', nome: '02 - Fazenda Santa Maria' },
-  { codigo: '03', nome: '03 - Fazenda Boa Vista' },
-  { codigo: '04', nome: '04 - Fazenda São José' }
+  { codigo: '5',  nome: '5 - São Manoel' },
+  { codigo: '6',  nome: '6 - Tangara' },
+  { codigo: '21', nome: '21 - São Pedro' },
+  { codigo: '25', nome: '25 - São Judas' },
+  { codigo: '26', nome: '26 - São Francisco' },
+  { codigo: '33', nome: '33 - Santana' },
+  { codigo: '34', nome: '34 - Santa Eliza' },
+  { codigo: '36', nome: '36 - Santa Francisca' },
+  { codigo: '17', nome: '17 - Santa Lucia 1' },
+  { codigo: '24', nome: '24 - Santa Lucia 2' },
+  { codigo: '18', nome: '18 - Caroline' },
+  { codigo: '27', nome: '27 - São João' },
+  { codigo: '28', nome: '28 - Santa Luzia' },
+  { codigo: '10', nome: '10 - Santa Adelina' }
 ];
 
 const EQUIPAMENTOS_GATEWAY = [
-  { COD_EMPR: '01', codigo: 'TR-01', frota: 'F-100', placa: 'ABC-1234', descricao: 'TRATOR JOHN DEERE 8320R', ano: 2021, chassi: '1RW8320R001', proprietario: 'PROPRIO' },
-  { COD_EMPR: '01', codigo: 'TR-02', frota: 'F-101', placa: 'XYZ-9876', descricao: 'COLHEITADEIRA CASE IH 8250', ano: 2022, chassi: 'YKG08250002', proprietario: 'PROPRIO' },
-  { COD_EMPR: '01', codigo: 'IM-01', frota: 'IM-01', placa: '',         descricao: 'PLANTADEIRA DB50',         ano: 2020, chassi: 'PLNT0050003', proprietario: 'PROPRIO' },
-  { COD_EMPR: '01', codigo: 'PV-01', frota: 'P-01',  placa: 'DEF-5678', descricao: 'PULVERIZADOR JACTO UNIPORT 3030', ano: 2023, chassi: 'JCT3030004', proprietario: 'PROPRIO' },
-  { COD_EMPR: '02', codigo: 'TR-03', frota: 'F-102', placa: 'GHI-9012', descricao: 'TRATOR VALTRA T250 CVT', ano: 2022, chassi: 'VLT2500005', proprietario: 'PROPRIO' },
-  { COD_EMPR: '02', codigo: 'TR-04', frota: 'F-103', placa: 'JKL-3456', descricao: 'TRATOR NEW HOLLAND T7.245', ano: 2021, chassi: 'NHT7245006', proprietario: 'PROPRIO' },
-  { COD_EMPR: '02', codigo: 'PV-02', frota: 'P-02',  placa: 'STU-1122', descricao: 'PULVERIZADOR JOHN DEERE M4040', ano: 2022, chassi: 'JDM4040007', proprietario: 'PROPRIO' },
-  { COD_EMPR: '03', codigo: 'CL-01', frota: 'F-200', placa: 'MNO-7890', descricao: 'COLHEITADEIRA JOHN DEERE S790', ano: 2023, chassi: 'JDS7900008', proprietario: 'PROPRIO' },
-  { COD_EMPR: '03', codigo: 'TR-05', frota: 'F-201', placa: 'PQR-3344', descricao: 'TRATOR CASE MAGNUM 340', ano: 2023, chassi: 'CAS3400009', proprietario: 'PROPRIO' },
-  { COD_EMPR: '04', codigo: 'TR-06', frota: 'F-301', placa: 'VWX-5566', descricao: 'TRATOR MASSEY FERGUSON 8737S', ano: 2022, chassi: 'MF87370010', proprietario: 'PROPRIO' },
-  { COD_EMPR: '04', codigo: 'CM-01', frota: 'CAM-01', placa: 'YZA-7788', descricao: 'CAMINHÃO PIPA MERCEDES ATEGO', ano: 2020, chassi: 'MBA24260011', proprietario: 'PROPRIO' },
+  // 5 - São Manoel
+  { COD_EMPR: '5',  codigo: 'TR-501', frota: 'F-501', placa: 'ABC-5001', descricao: 'TRATOR JOHN DEERE 8320R', ano: 2021, chassi: '1RW8320R501', proprietario: 'PROPRIO' },
+  { COD_EMPR: '5',  codigo: 'CL-501', frota: 'F-502', placa: 'XYZ-5002', descricao: 'COLHEITADEIRA CASE IH 8250', ano: 2022, chassi: 'YKG08250502', proprietario: 'PROPRIO' },
+  { COD_EMPR: '5',  codigo: 'PV-501', frota: 'P-501', placa: 'DEF-5003', descricao: 'PULVERIZADOR JACTO UNIPORT 3030', ano: 2023, chassi: 'JCT3030503', proprietario: 'PROPRIO' },
+  // 6 - Tangara
+  { COD_EMPR: '6',  codigo: 'TR-601', frota: 'F-601', placa: 'GHI-6001', descricao: 'TRATOR NEW HOLLAND T7.245', ano: 2021, chassi: 'NHT7245601', proprietario: 'PROPRIO' },
+  { COD_EMPR: '6',  codigo: 'PL-601', frota: 'F-602', placa: '',         descricao: 'PLANTADEIRA JOHN DEERE DB50', ano: 2020, chassi: 'PLNT0050602', proprietario: 'PROPRIO' },
+  // 21 - São Pedro
+  { COD_EMPR: '21', codigo: 'TR-2101', frota: 'F-2101', placa: 'JKL-2101', descricao: 'TRATOR VALTRA T250 CVT', ano: 2022, chassi: 'VLT2502101', proprietario: 'PROPRIO' },
+  { COD_EMPR: '21', codigo: 'PV-2101', frota: 'P-2101', placa: 'STU-2102', descricao: 'PULVERIZADOR JOHN DEERE M4040', ano: 2022, chassi: 'JDM40402102', proprietario: 'PROPRIO' },
+  // 25 - São Judas
+  { COD_EMPR: '25', codigo: 'TR-2501', frota: 'F-2501', placa: 'PQR-2501', descricao: 'TRATOR CASE MAGNUM 340', ano: 2023, chassi: 'CAS3402501', proprietario: 'PROPRIO' },
+  { COD_EMPR: '25', codigo: 'CL-2501', frota: 'F-2502', placa: 'MNO-2502', descricao: 'COLHEITADEIRA JOHN DEERE S790', ano: 2023, chassi: 'JDS7902502', proprietario: 'PROPRIO' },
+  // 26 - São Francisco
+  { COD_EMPR: '26', codigo: 'TR-2601', frota: 'F-2601', placa: 'VWX-2601', descricao: 'TRATOR JOHN DEERE 7230J', ano: 2022, chassi: 'JD72302601', proprietario: 'PROPRIO' },
+  { COD_EMPR: '26', codigo: 'CM-2601', frota: 'CAM-26', placa: 'YZA-2602', descricao: 'CAMINHÃO PIPA MERCEDES ATEGO', ano: 2020, chassi: 'MBA24262602', proprietario: 'PROPRIO' },
+  // 33 - Santana
+  { COD_EMPR: '33', codigo: 'TR-3301', frota: 'F-3301', placa: 'BCD-3301', descricao: 'TRATOR MASSEY FERGUSON 8737S', ano: 2022, chassi: 'MF87373301', proprietario: 'PROPRIO' },
+  // 34 - Santa Eliza
+  { COD_EMPR: '34', codigo: 'TR-3401', frota: 'F-3401', placa: 'EFG-3401', descricao: 'TRATOR JOHN DEERE 6190M', ano: 2021, chassi: 'JD61903401', proprietario: 'PROPRIO' },
+  // 36 - Santa Francisca
+  { COD_EMPR: '36', codigo: 'CL-3601', frota: 'F-3601', placa: 'HIJ-3601', descricao: 'COLHEITADEIRA CASE IH 9250', ano: 2023, chassi: 'CIH92503601', proprietario: 'PROPRIO' },
+  // 17 - Santa Lucia 1
+  { COD_EMPR: '17', codigo: 'TR-1701', frota: 'F-1701', placa: 'KLM-1701', descricao: 'TRATOR NEW HOLLAND T8.385', ano: 2022, chassi: 'NHT83851701', proprietario: 'PROPRIO' },
+  // 24 - Santa Lucia 2
+  { COD_EMPR: '24', codigo: 'PV-2401', frota: 'P-2401', placa: 'NOP-2401', descricao: 'PULVERIZADOR JACTO UNIPORT 4530', ano: 2023, chassi: 'JCT45302401', proprietario: 'PROPRIO' },
+  // 18 - Caroline
+  { COD_EMPR: '18', codigo: 'TR-1801', frota: 'F-1801', placa: 'QRS-1801', descricao: 'TRATOR VALTRA BH 194', ano: 2021, chassi: 'VLT1941801', proprietario: 'PROPRIO' },
+  // 27 - São João
+  { COD_EMPR: '27', codigo: 'TR-2701', frota: 'F-2701', placa: 'TUV-2701', descricao: 'TRATOR JOHN DEERE 8400R', ano: 2023, chassi: 'JD84002701', proprietario: 'PROPRIO' },
+  // 28 - Santa Luzia
+  { COD_EMPR: '28', codigo: 'CL-2801', frota: 'F-2801', placa: 'WXY-2801', descricao: 'COLHEITADEIRA JOHN DEERE S680', ano: 2022, chassi: 'JDS6802801', proprietario: 'PROPRIO' },
+  // 10 - Santa Adelina
+  { COD_EMPR: '10', codigo: 'TR-1001', frota: 'F-1001', placa: 'ZAB-1001', descricao: 'TRATOR CASE PUMA 230', ano: 2022, chassi: 'CAS2301001', proprietario: 'PROPRIO' },
 ];
 
 http.createServer((req, res) => {
