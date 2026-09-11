@@ -64,7 +64,17 @@ const Supabase = (() => {
       }
     );
     const data = await res.json();
-    if (!res.ok) throw new Error(data.error_description || data.message || 'Erro de autenticação');
+    if (!res.ok) {
+      const msg = data.error_description || data.msg || data.message || '';
+      // Mensagem amigável para e-mail não confirmado
+      if (msg.toLowerCase().includes('email not confirmed') || msg.toLowerCase().includes('email_not_confirmed')) {
+        throw new Error('E-mail ainda não confirmado. Verifique sua caixa de entrada ou peça ao administrador para desativar a confirmação de e-mail no Supabase.');
+      }
+      if (msg.toLowerCase().includes('invalid login') || msg.toLowerCase().includes('invalid credentials')) {
+        throw new Error('E-mail ou senha incorretos. Verifique suas credenciais.');
+      }
+      throw new Error(msg || 'Erro de autenticação. Tente novamente.');
+    }
     _session = data;
     persistSession(data);
     return data;
