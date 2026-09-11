@@ -1,0 +1,20 @@
+{
+  "name": "equipment-agent",
+  "version": "1.0.0",
+  "description": "Agent Oracle+Firebase para consulta de equipamentos e OS",
+  "main": "agent.js",
+  "scripts": {
+    "start": "node agent.js",
+    "mock": "node agent.js --mock",
+    "dev": "node --watch agent.js",
+    "sync": "node sync-equipamentos.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^17.4.2",
+    "firebase": "^12.13.0",
+    "oracledb": "^6.10.0"
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "name": "sistema-coa",
+  "version": "1.0.0",
+  "description": "Sistema COA - Controle de Operações Agrícolas",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "keywords": [
+    "agritech",
+    "coa",
+    "manutencao"
+  ],
+  "author": "COA Team",
+  "license": "ISC"
+}

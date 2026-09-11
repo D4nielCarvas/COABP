@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: sistema-coa
+    runtime: node
+    plan: free
+    region: oregon
+    buildCommand: ""
+    startCommand: npm start
+    envVars:
+      - key: NODE_VERSION
+        value: 20
