@@ -220,6 +220,16 @@ function showToast(msg, type = 'info') {
   t._timer = setTimeout(() => t.classList.add('hidden'), 3500);
 }
 
+function getUserDisplayName(user) {
+  if (!user) return 'Usuário';
+  return (
+    user.user_metadata?.full_name ||
+    user.user_metadata?.name ||
+    user.raw_user_meta_data?.full_name ||
+    (user.email ? user.email.split('@')[0] : 'Usuário')
+  );
+}
+
 /* ═══════════════════════════════════════════════════════════════════
    4. MÓDULO DE TELAS
 ═══════════════════════════════════════════════════════════════════ */
@@ -256,8 +266,8 @@ const Auth = (() => {
   }
 
   function setUserDisplay(session) {
-    const email = session?.user?.email || '';
-    document.getElementById('user-display').textContent = email;
+    const name = getUserDisplayName(session?.user);
+    document.getElementById('user-display').textContent = `👤 ${name}`;
   }
 
   async function login(email, password) {
@@ -383,7 +393,7 @@ const Modal = (() => {
     // Solicitante: quem está logado
     const session = Supabase.getSession();
     document.getElementById('m-solicitante').value = maintenance?.solicitante_nome
-      || session?.user?.email
+      || getUserDisplayName(session?.user)
       || '';
 
     document.getElementById('modal-error').textContent = '';
@@ -452,7 +462,7 @@ const Modal = (() => {
           titulo, categoria, status, descricao, solucao,
           data_solicitacao: new Date().toISOString(),
           solicitante_id:   session?.user?.id   || null,
-          solicitante_nome: session?.user?.email || null,
+          solicitante_nome: getUserDisplayName(session?.user),
           data_conclusao:   status === 'Realizada' ? new Date().toISOString() : null,
         };
         await Supabase.insert(TABLE, payload);
