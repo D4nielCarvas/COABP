@@ -32,6 +32,27 @@ const Supabase = (() => {
     return h;
   }
 
+  /** Cadastro com e-mail e senha */
+  async function signUp(email, password, fullName) {
+    const res = await fetch(
+      `${SUPABASE_URL}/auth/v1/signup`,
+      {
+        method: 'POST',
+        headers: headers(),
+        body: JSON.stringify({
+          email,
+          password,
+          data: { full_name: fullName },
+        }),
+      }
+    );
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error_description || data.message || 'Erro ao criar conta');
+    // Alguns projetos Supabase requerem confirmação de e-mail;
+    // retornamos o objeto para o chamador decidir o fluxo.
+    return data;
+  }
+
   /** Login com e-mail e senha */
   async function signIn(email, password) {
     const res = await fetch(
@@ -119,7 +140,7 @@ const Supabase = (() => {
     return Array.isArray(data) ? data[0] : data;
   }
 
-  return { signIn, signOut, restoreSession, select, insert, update, getSession: () => _session };
+  return { signIn, signUp, signOut, restoreSession, select, insert, update, getSession: () => _session };
 })();
 
 /* ═══════════════════════════════════════════════════════════════════
@@ -448,6 +469,23 @@ const Modal = (() => {
 ═══════════════════════════════════════════════════════════════════ */
 document.addEventListener('DOMContentLoaded', () => {
 
+  // ── Tabs Login / Cadastro ──
+  function switchTab(tab) {
+    const isLogin = tab === 'login';
+    document.getElementById('tab-login').classList.toggle('active', isLogin);
+    document.getElementById('tab-register').classList.toggle('active', !isLogin);
+    document.getElementById('tab-login').setAttribute('aria-selected', isLogin);
+    document.getElementById('tab-register').setAttribute('aria-selected', !isLogin);
+    document.getElementById('panel-login').classList.toggle('hidden', !isLogin);
+    document.getElementById('panel-register').classList.toggle('hidden', isLogin);
+    // Limpar erros ao trocar de aba
+    document.getElementById('login-error').textContent = '';
+    document.getElementById('register-error').textContent = '';
+    document.getElementById('register-success').classList.add('hidden');
+  }
+  document.getElementById('tab-login').addEventListener('click',    () => switchTab('login'));
+  document.getElementById('tab-register').addEventListener('click', () => switchTab('register'));
+
   // ── Login ──
   document.getElementById('login-form').addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -473,10 +511,62 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // Toggle visibilidade senha
+  // Toggle visibilidade senha (login)
   document.getElementById('btn-toggle-pass').addEventListener('click', () => {
     const input = document.getElementById('login-password');
     input.type = input.type === 'password' ? 'text' : 'password';
+  });
+
+  // Toggle visibilidade senha (cadastro)
+  document.getElementById('btn-toggle-reg-pass').addEventListener('click', () => {
+    const input = document.getElementById('reg-password');
+    input.type = input.type === 'password' ? 'text' : 'password';
+  });
+
+  // ── Cadastro ──
+  document.getElementById('register-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const name     = document.getElementById('reg-name').value.trim();
+    const email    = document.getElementById('reg-email').value.trim();
+    const password = document.getElementById('reg-password').value;
+    const confirm  = document.getElementById('reg-confirm').value;
+    const errEl    = document.getElementById('register-error');
+    const succEl   = document.getElementById('register-success');
+    const btnText  = document.getElementById('btn-register-text');
+    const btnLoad  = document.getElementById('btn-register-loader');
+
+    errEl.textContent = '';
+    succEl.classList.add('hidden');
+
+    if (!name)  { errEl.textContent = 'Informe seu nome completo.'; return; }
+    if (!email) { errEl.textContent = 'Informe um e-mail válido.'; return; }
+    if (password.length < 6) { errEl.textContent = 'A senha deve ter ao menos 6 caracteres.'; return; }
+    if (password !== confirm) { errEl.textContent = 'As senhas não coincidem.'; return; }
+
+    btnText.classList.add('hidden');
+    btnLoad.classList.remove('hidden');
+    document.getElementById('btn-register').disabled = true;
+
+    try {
+      const result = await Supabase.signUp(email, password, name);
+      // Se o Supabase retornar sessão direto (confirmação de e-mail desativada)
+      if (result.access_token) {
+        Supabase.restoreSession();
+        showToast('Conta criada! Bem-vindo(a)!', 'success');
+        Auth.init();
+      } else {
+        // Confirmação de e-mail ativada
+        succEl.textContent = '✅ Conta criada! Verifique seu e-mail para confirmar o cadastro e então faça o login.';
+        succEl.classList.remove('hidden');
+        document.getElementById('register-form').reset();
+      }
+    } catch (err) {
+      errEl.textContent = err.message;
+    } finally {
+      btnText.classList.remove('hidden');
+      btnLoad.classList.add('hidden');
+      document.getElementById('btn-register').disabled = false;
+    }
   });
 
   // ── Logout ──

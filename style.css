@@ -229,12 +229,37 @@ select.field-input option { background: var(--bg-elevated); color: var(--text-pr
   color: #f87171; font-size: 13px; min-height: 20px;
   animation: shake 0.3s ease;
 }
+.success-msg {
+  color: #34d399; font-size: 13px; min-height: 20px;
+  text-align: center; line-height: 1.5;
+}
 @keyframes shake {
   0%,100% { transform: translateX(0); }
   25%      { transform: translateX(-6px); }
   75%      { transform: translateX(6px); }
 }
 .hidden { display: none !important; }
+
+/* ── Auth Tabs ──────────────────────────────────────────────────── */
+.auth-tabs {
+  display: flex; border-radius: var(--radius-sm);
+  background: rgba(255,255,255,0.05);
+  padding: 4px; gap: 4px;
+  margin-bottom: 24px;
+  border: 1px solid var(--border);
+}
+.auth-tab {
+  flex: 1; background: none; border: none; cursor: pointer;
+  color: var(--text-muted); font-family: inherit; font-size: 13px;
+  font-weight: 600; padding: 8px 0; border-radius: calc(var(--radius-sm) - 2px);
+  transition: all var(--duration) var(--ease);
+}
+.auth-tab:hover  { color: var(--text-primary); }
+.auth-tab.active {
+  background: var(--accent);
+  color: #fff;
+  box-shadow: 0 2px 8px var(--accent-glow);
+}
 
 /* ── 6. TOPBAR ───────────────────────────────────────────────────── */
 .topbar {

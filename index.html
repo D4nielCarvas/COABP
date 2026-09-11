@@ -27,24 +27,66 @@
         <h1 class="logo-title">COA</h1>
         <p class="logo-sub">Sistema de Manutenções</p>
       </div>
-      <form id="login-form" class="login-form" novalidate>
-        <div class="field-group">
-          <label for="login-email" class="field-label">E-mail</label>
-          <input id="login-email" type="email" class="field-input" placeholder="seu@email.com" autocomplete="email" required />
-        </div>
-        <div class="field-group">
-          <label for="login-password" class="field-label">Senha</label>
-          <div class="input-wrapper">
-            <input id="login-password" type="password" class="field-input" placeholder="••••••••" autocomplete="current-password" required />
-            <button type="button" id="btn-toggle-pass" class="input-action" title="Mostrar/ocultar senha">👁</button>
+
+      <!-- Abas Login / Cadastro -->
+      <div class="auth-tabs" role="tablist" aria-label="Modo de acesso">
+        <button id="tab-login"    class="auth-tab active" role="tab" aria-selected="true"  aria-controls="panel-login">Entrar</button>
+        <button id="tab-register" class="auth-tab"        role="tab" aria-selected="false" aria-controls="panel-register">Criar Conta</button>
+      </div>
+
+      <!-- PAINEL: LOGIN -->
+      <div id="panel-login" role="tabpanel" aria-labelledby="tab-login">
+        <form id="login-form" class="login-form" novalidate>
+          <div class="field-group">
+            <label for="login-email" class="field-label">E-mail</label>
+            <input id="login-email" type="email" class="field-input" placeholder="seu@email.com" autocomplete="email" required />
           </div>
-        </div>
-        <p id="login-error" class="error-msg" aria-live="polite"></p>
-        <button id="btn-login" type="submit" class="btn btn-primary btn-full">
-          <span id="btn-login-text">Entrar</span>
-          <span id="btn-login-loader" class="btn-loader hidden"></span>
-        </button>
-      </form>
+          <div class="field-group">
+            <label for="login-password" class="field-label">Senha</label>
+            <div class="input-wrapper">
+              <input id="login-password" type="password" class="field-input" placeholder="••••••••" autocomplete="current-password" required />
+              <button type="button" id="btn-toggle-pass" class="input-action" title="Mostrar/ocultar senha">👁</button>
+            </div>
+          </div>
+          <p id="login-error" class="error-msg" aria-live="polite"></p>
+          <button id="btn-login" type="submit" class="btn btn-primary btn-full">
+            <span id="btn-login-text">Entrar</span>
+            <span id="btn-login-loader" class="btn-loader hidden"></span>
+          </button>
+        </form>
+      </div>
+
+      <!-- PAINEL: CADASTRO -->
+      <div id="panel-register" role="tabpanel" aria-labelledby="tab-register" class="hidden">
+        <form id="register-form" class="login-form" novalidate>
+          <div class="field-group">
+            <label for="reg-name" class="field-label">Nome completo <span class="required">*</span></label>
+            <input id="reg-name" type="text" class="field-input" placeholder="Seu nome" autocomplete="name" required />
+          </div>
+          <div class="field-group">
+            <label for="reg-email" class="field-label">E-mail <span class="required">*</span></label>
+            <input id="reg-email" type="email" class="field-input" placeholder="seu@email.com" autocomplete="email" required />
+          </div>
+          <div class="field-group">
+            <label for="reg-password" class="field-label">Senha <span class="required">*</span></label>
+            <div class="input-wrapper">
+              <input id="reg-password" type="password" class="field-input" placeholder="Mínimo 6 caracteres" autocomplete="new-password" required />
+              <button type="button" id="btn-toggle-reg-pass" class="input-action" title="Mostrar/ocultar senha">👁</button>
+            </div>
+          </div>
+          <div class="field-group">
+            <label for="reg-confirm" class="field-label">Confirmar senha <span class="required">*</span></label>
+            <input id="reg-confirm" type="password" class="field-input" placeholder="Repita a senha" autocomplete="new-password" required />
+          </div>
+          <p id="register-error" class="error-msg" aria-live="polite"></p>
+          <p id="register-success" class="success-msg hidden" aria-live="polite"></p>
+          <button id="btn-register" type="submit" class="btn btn-primary btn-full">
+            <span id="btn-register-text">Criar conta</span>
+            <span id="btn-register-loader" class="btn-loader hidden"></span>
+          </button>
+        </form>
+      </div>
+
     </div>
   </div>
 
