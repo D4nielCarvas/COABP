@@ -219,6 +219,17 @@ select.field-input option { background: var(--bg-elevated); color: var(--text-pr
 }
 .btn-ghost:hover { color: var(--text-primary); background: rgba(255,255,255,0.1); }
 
+.btn-success {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: #fff; box-shadow: 0 4px 16px rgba(16,185,129,0.35);
+}
+.btn-success:hover {
+  background: linear-gradient(135deg, #059669 0%, #047857 100%);
+  box-shadow: 0 6px 24px rgba(16,185,129,0.5);
+  transform: translateY(-1px);
+}
+.btn-success:active { transform: translateY(0); }
+
 .btn-full    { width: 100%; }
 .btn-sm      { padding: 6px 14px; font-size: 13px; }
 .btn-icon    { background: none; border: none; cursor: pointer; color: var(--text-muted); font-size: 18px; padding: 6px; transition: color var(--duration), transform var(--duration); }

@@ -529,6 +529,11 @@ const Modal = (() => {
     document.getElementById('modal-error').textContent = '';
     document.getElementById('modal-overlay').classList.remove('hidden');
 
+    // Botão Concluir: visível apenas na edição de manutenção NÃO concluída
+    const btnConcluir = document.getElementById('btn-modal-concluir');
+    const showConcluir = isEdit && (maintenance?.status !== 'Realizada');
+    btnConcluir.classList.toggle('hidden', !showConcluir);
+
     // Focar no título
     setTimeout(() => document.getElementById('m-titulo').focus(), 100);
   }
@@ -678,7 +683,39 @@ const Modal = (() => {
     }
   }
 
-  return { open, close, save, onFazendaChange };
+  async function concluir() {
+    if (!_editingId) return;
+    const btnText   = document.getElementById('btn-concluir-text');
+    const btnLoader = document.getElementById('btn-concluir-loader');
+    const btnConcluir = document.getElementById('btn-modal-concluir');
+    const errorEl   = document.getElementById('modal-error');
+
+    btnText.classList.add('hidden');
+    btnLoader.classList.remove('hidden');
+    btnConcluir.disabled = true;
+    errorEl.textContent  = '';
+
+    try {
+      const existing = State.getAll().find(m => m.id === _editingId);
+      const payload  = {
+        status:         'Realizada',
+        data_conclusao: existing?.data_conclusao || new Date().toISOString(),
+        updated_at:     new Date().toISOString(),
+      };
+      await Supabase.update(TABLE, _editingId, payload);
+      showToast('✅ Manutenção concluída com sucesso!', 'success');
+      close();
+      await Dashboard.load();
+    } catch (err) {
+      errorEl.textContent = 'Erro ao concluir: ' + err.message;
+    } finally {
+      btnText.classList.remove('hidden');
+      btnLoader.classList.add('hidden');
+      btnConcluir.disabled = false;
+    }
+  }
+
+  return { open, close, save, concluir, onFazendaChange };
 })();
 
 /* ═══════════════════════════════════════════════════════════════════
@@ -843,6 +880,9 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('modal-overlay').addEventListener('click', (e) => {
     if (e.target === document.getElementById('modal-overlay')) Modal.close();
   });
+
+  // ── Modal concluir ──
+  document.getElementById('btn-modal-concluir').addEventListener('click', Modal.concluir);
 
   // ── Modal salvar ──
   document.getElementById('btn-modal-save').addEventListener('click', Modal.save);
